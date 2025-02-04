@@ -11,13 +11,17 @@ uniform float gamma;
 
 void main()
 {
+    // Sample original color
     vec3 finalColor = texture(screenTexture, TexCoords).rgb;
 
     if(useBlur)
     {
+        // Grabs the size of one pixel in UV space by getting the screen resolution
         vec2 texelSize = 1.0 / textureSize(screenTexture, 0).xy;
         vec3 totalColor = vec3(0);
 
+        // Loops through a kernel, sampling pixels and shifts neighbouring pixels throughout offset
+        // to create the bluriness effect
         for(int y = -(bluriness / 2); y <= bluriness / 2; y++)
         {
             for(int x = -(bluriness / 2); x <= bluriness / 2; x++)
@@ -27,11 +31,13 @@ void main()
             }
         }
 
+        // Add bluriness effect to the final color
         totalColor /= (bluriness * bluriness);
         finalColor = totalColor;
     }    
     if(useGamma)
     {
+        // Uses pow to darken the image the lower gamma is and vice versa
         finalColor = pow(finalColor, vec3(1.0 / gamma));
     }
 
