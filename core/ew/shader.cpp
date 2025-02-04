@@ -97,6 +97,10 @@ namespace ew {
 	{
 		glUniform1i(glGetUniformLocation(m_id, name.c_str()), v);
 	}
+	void Shader::setBool(const std::string& name, bool v) const
+	{
+		glUniform1i(glGetUniformLocation(m_id, name.c_str()), v);
+	}
 	void Shader::setFloat(const std::string& name, float v) const
 	{
 		glUniform1f(glGetUniformLocation(m_id, name.c_str()), v);

@@ -14,6 +14,7 @@ namespace ew {
 		Shader(const std::string& vertexShader, const std::string& fragmentShader);
 		void use()const;
 		void setInt(const std::string& name, int v) const;
+		void setBool(const std::string& name, bool v) const;
 		void setFloat(const std::string& name, float v) const;
 		void setVec2(const std::string& name, float x, float y) const;
 		void setVec2(const std::string& name, const glm::vec2& v) const;
