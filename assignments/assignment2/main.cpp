@@ -158,7 +158,7 @@ int main() {
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 		glEnable(GL_DEPTH_TEST);
 		glClearColor(0.6f,0.8f,0.92f,1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_DEPTH_BUFFER_BIT);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, brickTexture);
@@ -166,24 +166,28 @@ int main() {
 		float near_plane = 1.0f, far_plane = 7.5f;
 		glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
 
-		glm::mat4 lightView = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f));
+		/*glm::mat4 lightView = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f),
+			lightDirection,
+			glm::vec3(0.0f, 1.0f, 0.0f));*/
+
+		glm::mat4 lightView = glm::lookAt(lightDirection * 10.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
 		shadowShader.use();
-		shadowShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
 
 		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 		glClear(GL_DEPTH_BUFFER_BIT);
+
+		shadowShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);		
 
 		monkeyModel.draw();
 		planeMesh.draw();
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+		// Second Pass
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 		glEnable(GL_DEPTH_TEST);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -207,10 +211,15 @@ int main() {
 		shader.setMat4("_Model", planeTransform.modelMatrix());
 		planeMesh.draw();
 
-		// Second Pass
+		// Third Pass
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		//glClear(GL_COLOR_BUFFER_BIT);		
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glViewport(0, 0, screenWidth, screenHeight);
+		glClearColor(0, 0, 0, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		postProcessShader.use();
 		postProcessShader.setBool("useBlur", useBlur);
@@ -218,10 +227,9 @@ int main() {
 		postProcessShader.setInt("bluriness", bluriness);
 		postProcessShader.setFloat("gamma", gamma);
 
-		glBindVertexArray(quadVAO);
-		glDisable(GL_DEPTH_TEST);
 		glBindTexture(GL_TEXTURE_2D, texture);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glBindVertexArray(quadVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 6);		
 
 		drawUI();
 
