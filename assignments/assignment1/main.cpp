@@ -43,6 +43,7 @@ bool useGamma = false;
 int bluriness = 5.0f;
 float gamma = 2.2f;
 
+// Array for quad vertices
 float quadVertices[] = {
 		-1.0f,  1.0f,  0.0f, 1.0f,
 		-1.0f, -1.0f,  0.0f, 0.0f,
@@ -59,6 +60,7 @@ int main() {
 	//ew::Shader screenShader = ew::Shader("assets/frameBufferScreen.vert", "assets/frameBufferScreen.frag");
 	ew::Model monkeyModel = ew::Model("assets/suzanne.obj");
 
+	// Shader Call for post processing shader
 	ew::Shader postProcessShader = ew::Shader("assets/frameBufferScreen.vert", "assets/postProcessing.frag");
 
 	GLuint brickTexture = ew::loadTexture("assets/brick_color.jpg");
@@ -68,13 +70,16 @@ int main() {
 	camera.aspectRatio = (float)screenWidth / screenHeight;
 	camera.fov = 60.0f;	
 
-	
+	// Creates a Vertex Array Object (VAO) and a Vertex Buffer Object (VBO) and then binds each of them,
+	// then uploads quadvertices into the VBO
 	unsigned int quadVAO, quadVBO;
 	glGenVertexArrays(1, &quadVAO);
 	glGenBuffers(1, &quadVBO);
 	glBindVertexArray(quadVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+
+	// Configures vertex attributes
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(1);
@@ -84,10 +89,13 @@ int main() {
 	glCullFace(GL_BACK);
 	glEnable(GL_DEPTH_TEST);
 
+	// Creates a Framebuffer Object and binds it
 	unsigned int fbo;
 	glGenFramebuffers(1, &fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
+	// Creates a texture and binds it, allocates memory for a color attachment, sets parameters,
+	// then attaches the texture to the framebuffer
 	unsigned int texture;
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
@@ -96,6 +104,7 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
 
+	// Creates a Renderbuffer Object and binds it and sets up depth and stencil testing
 	unsigned int rbo;
 	glGenRenderbuffers(1, &rbo);
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
@@ -154,6 +163,7 @@ int main() {
 		postProcessShader.setInt("bluriness", bluriness);
 		postProcessShader.setFloat("gamma", gamma);
 
+		// Renders the quad using the framebuffer's texture
 		glBindVertexArray(quadVAO);
 		glDisable(GL_DEPTH_TEST);
 		glBindTexture(GL_TEXTURE_2D, texture);
