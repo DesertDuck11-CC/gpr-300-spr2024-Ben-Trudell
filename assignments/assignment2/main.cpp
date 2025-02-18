@@ -45,6 +45,8 @@ float gamma = 2.2f;
 
 glm::vec3 lightDirection = glm::vec3(0.0f, -1.0f, 0.0f);
 
+unsigned int depthMap;
+
 float quadVertices[] = {
 		-1.0f,  1.0f,  0.0f, 1.0f,
 		-1.0f, -1.0f,  0.0f, 0.0f,
@@ -86,7 +88,6 @@ int main() {
 	unsigned int depthMapFBO;
 	glGenFramebuffers(1, &depthMapFBO);
 	
-	unsigned int depthMap;
 	glGenTextures(1, &depthMap);
 	glBindTexture(GL_TEXTURE_2D, depthMap);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
@@ -177,7 +178,7 @@ int main() {
 		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 		glClear(GL_DEPTH_BUFFER_BIT);
-		//
+
 		monkeyModel.draw();
 		planeMesh.draw();
 
@@ -272,6 +273,17 @@ void drawUI() {
 	{
 		ImGui::SliderFloat3("Light Direction", &lightDirection.x, -1.0f, 1.0f);
 	}
+
+	ImGui::Begin("Shadow Map");
+	//Using a Child allow to fill all the space of the window.
+	ImGui::BeginChild("Shadow Map");
+	//Stretch image to be window size
+	ImVec2 windowSize = ImGui::GetWindowSize();
+	//Invert 0-1 V to flip vertically for ImGui display
+	//shadowMap is the texture2D handle
+	ImGui::Image((ImTextureID)depthMap, windowSize, ImVec2(0, 1), ImVec2(1, 0));
+	ImGui::EndChild();
+	ImGui::End();
 
 	ImGui::End();
 
